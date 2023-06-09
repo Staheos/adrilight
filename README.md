@@ -1,5 +1,5 @@
 # Fork
-Originally created by fabsenet: https://github.com/fabsenet/adrilight
+Originally created by fabsenet: [adrilight](https://github.com/fabsenet/adrilight), and before by MrBoe: [Bambilight](https://github.com/MrBoe/Bambilight)
 
 This fork uses audio from computer to change brightness of leds.
 
