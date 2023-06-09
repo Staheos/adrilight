@@ -9,12 +9,14 @@ using System.Windows.Media;
 using adrilight.Util;
 using System.Linq;
 using Newtonsoft.Json;
+using adrilight.Audio;
 
 namespace adrilight
 {
     internal sealed class SerialStream : IDisposable, ISerialStream
     {
         private ILogger _log = LogManager.GetCurrentClassLogger();
+        AudioRecv sound = new AudioRecv();
 
         public SerialStream(IUserSettings userSettings, ISpotSet spotSet)
         {
@@ -82,6 +84,8 @@ namespace adrilight
 
         public void Start()
         {
+            sound.StartRecording();
+
             _log.Debug("Start called.");
             if (_workerThread != null) return;
 
@@ -128,14 +132,24 @@ namespace adrilight
                 Buffer.BlockCopy(_messagePreamble, 0, outputStream, 0, _messagePreamble.Length);
                 Buffer.BlockCopy(_messagePostamble, 0, outputStream, bufferLength - _messagePostamble.Length, _messagePostamble.Length);
 
+                double audio = sound.fraction;
+
                 var allBlack = true;
                 foreach (Spot spot in SpotSet.Spots)
                 {
                     if (!UserSettings.SendRandomColors)
                     {
-                        outputStream[counter++] = spot.Blue; // blue
-                        outputStream[counter++] = spot.Green; // green
-                        outputStream[counter++] = spot.Red; // red
+                        byte blue = (byte)Math.Min(spot.Blue * audio, 255);
+                        byte green = (byte)Math.Min(spot.Green * audio, 255);
+                        byte red = (byte)Math.Min(spot.Red * audio, 255);
+
+                        outputStream[counter++] = blue;
+                        outputStream[counter++] = green;
+                        outputStream[counter++] = red; 
+
+                        //outputStream[counter++] = spot.Blue; // blue
+                        //outputStream[counter++] = spot.Green; // green
+                        //outputStream[counter++] = spot.Red; // red
 
                         allBlack = allBlack && spot.Red == 0 && spot.Green == 0 && spot.Blue == 0;
                     }
