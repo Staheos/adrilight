@@ -1,5 +1,6 @@
 ﻿using adrilight.Settings;
 using GalaSoft.MvvmLight;
+using NAudio.Wave;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,10 @@ namespace adrilight
         private bool _sendRandomColors = false;
         private int _limitFps = 60;
         private int _configFileVersion = 2;
+        private bool _audioEnabled = false;
+        private float _audioPower = 1f;
+        private string _audioDevice = "NOT SET";
+
         private AlternateWhiteBalanceModeEnum _alternateWhiteBalanceMode = AlternateWhiteBalanceModeEnum.Off;
 
         //support future config file migration
@@ -80,6 +85,25 @@ namespace adrilight
         public byte AltWhitebalanceBlue { get => _altWhitebalanceBlue; set { Set(() => AltWhitebalanceBlue, ref _altWhitebalanceBlue, value); } }
 
         public bool SendRandomColors { get => _sendRandomColors; set { Set(() => SendRandomColors, ref _sendRandomColors, value); } }
+
+        //audio
+        public bool AudioEnabled { get => this._audioEnabled; set { Set(() => AudioEnabled, ref this._audioEnabled, value); } }
+        public float AudioPower { get => this._audioPower; set { Set(() => AudioPower, ref this._audioPower, value); } }
+        public string AudioDevice { get => this._audioDevice; set { Set(() => AudioDevice, ref this._audioDevice, value); } }
+        //public string AudioDevice { get => WaveIn.GetCapabilities(this._audioDevice).ProductName; set 
+        //    {
+        //        //WaveInCapabilities? cap = null;
+        //        for (int i = 0; i < WaveIn.DeviceCount; i++)
+        //        {
+        //            if (value == WaveIn.GetCapabilities(i).ProductName)
+        //            {
+        //                this._audioDevice = i;
+        //                //cap = WaveIn.GetCapabilities(i);
+        //                break;
+        //            }
+        //        }
+        //        //Set(() => AudioDevice, ref this._audioDevice, cap); 
+        //    } }
 
         public Guid InstallationId { get; set; } = Guid.NewGuid();
         public AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get => _alternateWhiteBalanceMode; set { Set(() => AlternateWhiteBalanceMode, ref _alternateWhiteBalanceMode, value); } }

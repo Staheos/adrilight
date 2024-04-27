@@ -1,14 +1,11 @@
 # Fork
 Originally created by fabsenet: [adrilight](https://github.com/fabsenet/adrilight), and before by MrBoe: [Bambilight](https://github.com/MrBoe/Bambilight)
 
-This fork uses audio from computer to change brightness of leds.
+This fork uses audio from computer to change brightness of leds. Algorithm will be improved in future!
 
 # adrilight V2
 
-
 ![adrilight logo](assets/adrilight_icon.jpg)
-
-
 
 > An Ambilight clone for Windows based sources - HTPC or just a normal PC
 

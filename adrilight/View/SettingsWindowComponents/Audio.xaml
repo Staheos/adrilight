@@ -1,0 +1,108 @@
+﻿<UserControl x:Class="adrilight.View.SettingsWindowComponents.Audio"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:adrilight.View.SettingsWindowComponents"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes" xmlns:validationRules="clr-namespace:adrilight.ViewModel.ValidationRules"
+             TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+    TextElement.FontWeight="Regular"
+    TextElement.FontSize="13"
+    TextOptions.TextFormattingMode="Ideal" 
+    TextOptions.TextRenderingMode="Auto"        
+    Background="{DynamicResource MaterialDesignPaper}"
+    FontFamily="{StaticResource MaterialDesignFont}"
+     mc:Ignorable="d" 
+     d:DesignHeight="900" d:DesignWidth="900">
+
+    <Grid Width="900">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        
+        <materialDesign:Card Margin="4 4 4 0" Grid.ColumnSpan="2">
+            <StackPanel Margin="8 8 8 8">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0 0 0 0" TextAlignment="Justify" FontWeight="Bold">
+                    What is Audio Mode doing?
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0 8 0 0" TextAlignment="Justify">
+                    After adrilight fetched the screen color of the screen region for each pixel of the LED strip they can be modified again with computer audio.
+                    <LineBreak />
+                    Experiment with it yourself!
+                    <LineBreak />
+                    <LineBreak />
+                    <Bold>Disabled</Bold> disables audio usage.
+                    <LineBreak />
+                    <LineBreak />
+                    <Bold>Enabled</Bold> will record audio from computer and use it to modulate LEDs brightness.
+                    <LineBreak />
+                    <LineBreak />
+                    This option making is still in progress so it is to be modified in future and sometimes can look strange.
+                </TextBlock>
+            </StackPanel>
+        </materialDesign:Card>
+        <materialDesign:Card Margin="4 4 2 4" Grid.Row="1" Grid.Column="0">
+            <StackPanel Margin="8 8 8 8">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0 0 0 0" TextAlignment="Center" FontWeight="Bold">
+            Audio Enabled
+                </TextBlock>
+                <ToggleButton Margin="8" 
+                      IsChecked="{Binding Settings.AudioEnabled}"
+                      VerticalAlignment="Center"
+                      Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                      ToolTip="Audio Enabled" />
+            </StackPanel>
+        </materialDesign:Card>
+        <materialDesign:Card Margin="4 4 4 4" Width="300" Grid.Row="1" Grid.Column="1">
+            <StackPanel Margin="8 8 8 8" >
+                <TextBlock FontWeight="Bold">Audio Power</TextBlock>
+                <DockPanel>
+                    <TextBox DockPanel.Dock="Right"
+                        MinWidth="50"
+                        Margin="8 0 0 8"
+                        VerticalAlignment="Bottom">
+                        <TextBox.Text>
+                            <Binding Path="Settings.AudioPower" UpdateSourceTrigger="PropertyChanged">
+                                <Binding.ValidationRules>
+                                </Binding.ValidationRules>
+                            </Binding>
+                        </TextBox.Text>
+                    </TextBox>
+                    <Slider Minimum="1"
+                        Maximum="{Binding AudioPowerMaximum}" 
+                        Style="{StaticResource MaterialDesignDiscreteSlider}" 
+                        TickFrequency="1"
+                        Value="{Binding Settings.AudioPower}" />
+                </DockPanel>
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0 8 0 0" TextAlignment="Justify">
+                Just audio volume modifier applied to LEDs.
+                </TextBlock>
+            </StackPanel>
+        </materialDesign:Card>
+        <materialDesign:Card Margin="4 4 4 4" Width="300" Grid.Row="2" Grid.Column="1">
+            <StackPanel Margin="8 8 8 8" >
+                <TextBlock FontWeight="Bold">Audio Device</TextBlock>
+                <ComboBox
+                materialDesign:HintAssist.Hint="Audio Device"
+                ItemsSource="{Binding AudioDevices}">
+                    <ComboBox.SelectedValue>
+                        <Binding Path="Settings.AudioDevice" UpdateSourceTrigger="PropertyChanged">
+                            <Binding.ValidationRules>
+                                <validationRules:NotEmptyValidationRule ValidatesOnTargetUpdated="True"/>
+                            </Binding.ValidationRules>
+                        </Binding>
+                    </ComboBox.SelectedValue>
+                </ComboBox>
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0 22 0 0" TextAlignment="Justify">
+                Playback device to capture audio from.
+                </TextBlock>
+            </StackPanel>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

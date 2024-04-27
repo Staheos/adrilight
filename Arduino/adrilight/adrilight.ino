@@ -1,7 +1,7 @@
 #include "FastLED.h"
 
-#define NUM_LEDS (2*73+2*41)
-#define LED_DATA_PIN 3
+#define NUM_LEDS 52 //(2*73+2*41)
+#define LED_DATA_PIN 6
 #define BRIGHTNESS 255 //range is 0..255 with 255 beeing the MAX brightness
 
 // --------------------------------------------------------------------------------------------

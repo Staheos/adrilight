@@ -4,6 +4,7 @@ using adrilight.Settings;
 using adrilight.View;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
+using NAudio.Wave;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -27,7 +28,8 @@ namespace adrilight.ViewModel
     {
         private static ILogger _log = LogManager.GetCurrentClassLogger();
 
-        private const string ProjectPage = "https://github.com/fabsenet/adrilight";
+        private const string ProjectPage = "https://github.com/Staheos/adrilight";
+        private const string OriginalProjectPage = "https://github.com/fabsenet/adrilight";
         private const string IssuesPage = "https://github.com/fabsenet/adrilight/issues";
         private const string NightlightMdPage = "https://github.com/fabsenet/adrilight/blob/master/NightlightDetection.md";
         private const string LatestReleasePage = "https://github.com/fabsenet/adrilight/releases/latest";
@@ -104,6 +106,10 @@ namespace adrilight.ViewModel
                         RaisePropertyChanged(() => TransferCanBeStarted);
                         RaisePropertyChanged(() => TransferCanNotBeStarted);
                         break;
+
+                    case nameof(Settings.AudioDevice):
+                        this.serialStream.SetAudioDevice(Settings.AudioDevice);
+                        break;
                 }
             };
         }
@@ -138,6 +144,20 @@ namespace adrilight.ViewModel
                 _log.Info($"SelectedViewPart is now {_selectedViewPart?.ViewPartName}");
 
                 IsPreviewTabOpen = _selectedViewPart is View.SettingsWindowComponents.Preview.PreviewSelectableViewPart;
+            }
+        }
+        public IList<string> AudioDevices 
+        {
+            // refrech on select page
+            get
+            {
+                List<string> devices = new List<string>();
+                int device_count = WaveInEvent.DeviceCount;
+                for (int i = 0; i < device_count; i++)
+                {
+                    devices.Add(WaveInEvent.GetCapabilities(i).ProductName);
+                }
+                return devices;
             }
         }
 
@@ -216,6 +236,7 @@ namespace adrilight.ViewModel
 
 
         public ICommand OpenUrlProjectPageCommand { get; } = new RelayCommand(() => OpenUrl(ProjectPage));
+        public ICommand OpenOriginalUrlProjectPageCommand { get; } = new RelayCommand(() => OpenUrl(OriginalProjectPage));
         public ICommand OpenUrlIssuesPageCommand { get; } = new RelayCommand(() => OpenUrl(IssuesPage));
         public ICommand OpenNightlightMdPageCommand { get; } = new RelayCommand(() => OpenUrl(NightlightMdPage));
         public ICommand OpenUrlLatestReleaseCommand { get; } = new RelayCommand(() => OpenUrl(LatestReleasePage));
@@ -286,6 +307,15 @@ namespace adrilight.ViewModel
             {
                 Set(ref _isInNightLightMode, value);
                 RaisePropertyChanged(nameof(IsInDaylightLightMode));
+            }
+        }
+
+        private float _audioPowerMaximum = 200;
+        public float AudioPowerMaximum {
+            get
+            {
+                // ?
+                return this._audioPowerMaximum = Math.Max(Settings.AudioPower, this._audioPowerMaximum);
             }
         }
 

@@ -45,6 +45,7 @@
                 <materialDesign:PopupBox DockPanel.Dock="Right" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False">
                     <StackPanel>
                         <Button Content="Project Page" Command="{Binding OpenUrlProjectPageCommand}"/>
+                        <Button Content="Original Project Page" Command="{Binding OpenOriginalUrlProjectPageCommand}"/>
                         <Button Content="I have an issue..." Command="{Binding OpenUrlIssuesPageCommand}"/>
                         <Button Content="Latest Release" Command="{Binding OpenUrlLatestReleaseCommand}"/>
                         <Separator/>

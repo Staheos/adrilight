@@ -46,6 +46,11 @@ namespace adrilight.Fakes
         public int LimitFps { get; set; } = 60;
         public string AdrilightVersion { get; set; } = "2.0.6";
 
+        //audio
+        public bool AudioEnabled { get; set; }
+        public float AudioPower { get; set; }
+        public string AudioDevice {  get; set; }
+
         public AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get; set; } = AlternateWhiteBalanceModeEnum.Off;
 #pragma warning disable CS0067
         public event PropertyChangedEventHandler PropertyChanged;

@@ -41,6 +41,12 @@ namespace adrilight
         int LimitFps { get; set; }
 
         string AdrilightVersion { get; set; }
+
+        //audio
+        bool AudioEnabled { get; set; }
+        // in percentages %
+        float AudioPower { get; set; }
+        string AudioDevice { get; set; }
         AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get; set; }
     }
 }

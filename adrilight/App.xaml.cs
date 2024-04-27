@@ -23,6 +23,7 @@ using System.Windows.Threading;
 using Ninject.Extensions.Conventions;
 using adrilight.Resources;
 using adrilight.Util;
+using adrilight.Audio;
 
 namespace adrilight
 {   

@@ -10,18 +10,44 @@ using adrilight.Util;
 using System.Linq;
 using Newtonsoft.Json;
 using adrilight.Audio;
+using System.Numerics;
+using Accord.Math;
 
 namespace adrilight
 {
     internal sealed class SerialStream : IDisposable, ISerialStream
     {
         private ILogger _log = LogManager.GetCurrentClassLogger();
-        AudioRecv sound = new AudioRecv();
+
+        // MY
+        //AudioRecv sound = new AudioRecv();
+        private Sound sound;
+        double audio_cycle = 0;
+        double audio = 0;
+        
+        public void SetAudioDevice(string name)
+        {
+            this.sound.SetAudioDevice(name);
+        }
+        //double[] hannWindow;
+
+        //private void GenerateHannWindow()
+        //{
+        //    hannWindow = new double[sound.BUFFERSIZE / 2];
+        //    var angleUnit = 2 * Math.PI / (hannWindow.Length - 1);
+        //    for (int i = 0; i < hannWindow.Length; i++)
+        //    {
+        //        hannWindow[i] = 0.5 * (1 - Math.Cos(i * angleUnit));
+        //    }
+        //}
 
         public SerialStream(IUserSettings userSettings, ISpotSet spotSet)
         {
             UserSettings = userSettings ?? throw new ArgumentNullException(nameof(userSettings));
             SpotSet = spotSet ?? throw new ArgumentNullException(nameof(spotSet));
+
+            this.sound = new Sound();
+            this.sound.SetAudioDevice(userSettings.AudioDevice);
 
             UserSettings.PropertyChanged += UserSettings_PropertyChanged;
             RefreshTransferState();
@@ -84,6 +110,7 @@ namespace adrilight
 
         public void Start()
         {
+            //GenerateHannWindow();
             sound.StartRecording();
 
             _log.Debug("Start called.");
@@ -132,20 +159,130 @@ namespace adrilight
                 Buffer.BlockCopy(_messagePreamble, 0, outputStream, 0, _messagePreamble.Length);
                 Buffer.BlockCopy(_messagePostamble, 0, outputStream, bufferLength - _messagePostamble.Length, _messagePostamble.Length);
 
-                double audio = sound.fraction;
+                // BEGIN AUDIO PROCESSING
+                double[] fft = new double[1];
+                double[] audio_arr = new double[64];
+
+                    //if (sound.bwp.BufferedBytes >= sound.BUFFERSIZE)
+                    //{
+                    //int nPoints = sound.BUFFERSIZE / 2; // whatever we measure must be a power of 2
+                    //double[] data = new double[nPoints]; // this is what we will measure
+
+                    //var audioBytes = new byte[sound.BUFFERSIZE];
+                    //sound.bwp.Read(audioBytes, 0, sound.BUFFERSIZE);
+
+                    //for (int i = 0; i < sound.BUFFERSIZE / 2; i++)
+                    //{
+                    //    data[i] = BitConverter.ToInt16(audioBytes, i * 2);
+                    //}
+
+                    //Complex[] fftComplex = new Complex[nPoints]; // the FFT function requires complex format
+                    //for (int i = 0; i < data.Length; i++)
+                    //    fftComplex[i] = new Complex(data[i], 0.0); // make it complex format
+
+                    //for (int i = 0; i < hannWindow.Length; i++)
+                    //    fftComplex[i] *= hannWindow[i];
+
+                    //Accord.Math.FourierTransform.FFT(fftComplex, Accord.Math.FourierTransform.Direction.Forward);
+                    //fft = new double[fftComplex.Length]; // this is where we will store the output (fft)
+                    //for (int i = 0; i < fftComplex.Length; i++)
+                    //    fft[i] = fftComplex[i].Magnitude; // back to double
+                fft = sound.GetData();
+
+                
+
+                if (fft is not null)
+                {
+                    for (int i = 0; i < fft.Length; i++)
+                    {
+                        fft[i] *= fft[i];
+                        fft[i] /= 600;
+                    }
+
+                    
+
+                    for (int i = 0; i < 64; i++)
+                    {
+                        audio_arr[i] = 0;
+                        audio_arr[i] += fft[4 * i];
+                        audio_arr[i] += fft[4 * i + 1];
+                        audio_arr[i] += fft[4 * i + 2];
+                        audio_arr[i] += fft[4 * i + 3];
+                        audio_arr[i] = audio_arr[i] / 4;
+                    }
+                    // TODO 2023 10 22 - maybe change audio mode to stereo?
+                    //TODO 2023 10 21 - maybe sqquare the values after taking maximums? or mergins in groups?
+
+                    //int max = 0;
+                    //for (int i = 0; i < audio_arr.Length; i++)
+                    //{
+                    //    if (audio_arr[i] > audio_arr[max])
+                    //    {
+                    //        max = i;
+                    //    }
+                    //}
+                    //double max_val = audio_arr[max];
+                    //audio_arr[max] = 0;
+
+                    //int max2 = 0;
+                    //for (int i = 0; i < audio_arr.Length; i++)
+                    //{
+                    //    if (audio_arr[i] > audio_arr[max])
+                    //    {
+                    //        max2 = i;
+                    //    }
+                    //}
+                    int len = audio_arr.Length;
+                    audio_cycle = audio_cycle / 1.6 * 450 * 2;
+                    //audio += Math.Max(max_val / 1.2, (max_val + audio_arr[max2]) / 2);
+                    //audio += max_val;
+                    //audio += audio_arr[max2];
+
+                    audio_arr.Sort();
+
+                    audio_cycle += audio_arr[len - 1];
+                    audio_cycle += audio_arr[len - 2];
+                    audio_cycle += audio_arr[len - 3];
+                    audio_cycle += audio_arr[len - 4];
+
+                    audio_cycle /= 2;
+
+                    // fix volume
+                    audio_cycle /= 450;
+
+                    // AudioPower is percentages
+                    audio = audio_cycle * UserSettings.AudioPower / 100;
+                }
+                else
+                {
+
+                }
 
                 var allBlack = true;
                 foreach (Spot spot in SpotSet.Spots)
                 {
                     if (!UserSettings.SendRandomColors)
                     {
-                        byte blue = (byte)Math.Min(spot.Blue * audio, 255);
-                        byte green = (byte)Math.Min(spot.Green * audio, 255);
-                        byte red = (byte)Math.Min(spot.Red * audio, 255);
+                        byte blue;
+                        byte green;
+                        byte red;
+                        if (UserSettings.AudioEnabled)
+                        {
+                            blue = (byte)Math.Min(spot.Blue * audio, 255);
+                            green = (byte)Math.Min(spot.Green * audio, 255);
+                            red = (byte)Math.Min(spot.Red * audio, 255);
+                        }
+                        else
+                        {
+                            blue = spot.Blue;
+                            green = spot.Green;
+                            red = spot.Red;
+                        }
+                        
 
                         outputStream[counter++] = blue;
                         outputStream[counter++] = green;
-                        outputStream[counter++] = red; 
+                        outputStream[counter++] = red;
 
                         //outputStream[counter++] = spot.Blue; // blue
                         //outputStream[counter++] = spot.Green; // green

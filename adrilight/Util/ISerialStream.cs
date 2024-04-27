@@ -7,5 +7,6 @@
         void Start();
         void Stop();
         bool IsValid();
+        void SetAudioDevice(string name);
     }
 }
