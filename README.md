@@ -1,4 +1,10 @@
-# No active development here!
+# Fork
+Originally created by fabsenet: [adrilight](https://github.com/fabsenet/adrilight), and before by MrBoe: [Bambilight](https://github.com/MrBoe/Bambilight)
+
+This fork uses audio from computer to change brightness of leds. Algorithm will be improved in future!
+
+
+# No active development here! (only original)
 
 Hi, 
 I do no longer any active development on adrilight. I no longer have the same TV setup at home and I switched my HTPC from Windows to Linux Mint also.
@@ -14,11 +20,6 @@ Good luck!
 -------
 -------
 -------
-
-# Fork
-Originally created by fabsenet: [adrilight](https://github.com/fabsenet/adrilight), and before by MrBoe: [Bambilight](https://github.com/MrBoe/Bambilight)
-
-This fork uses audio from computer to change brightness of leds. Algorithm will be improved in future!
 
 # adrilight V2
 
