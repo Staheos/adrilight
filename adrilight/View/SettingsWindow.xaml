@@ -7,20 +7,35 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
 
+    AllowsTransparency="True"
+        Opacity="0.9"
+        ResizeMode="CanMinimize"
+        
+        
+
+    MinWidth="1220" MinHeight="700"
+        MaxWidth="1920" MaxHeight="1080"
+
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Regular"
         TextElement.FontSize="13"
         TextOptions.TextFormattingMode="Ideal" 
         TextOptions.TextRenderingMode="Auto"        
-        Background="{DynamicResource MaterialDesignPaper}"
+        Background="#CC2B2B2B"
         FontFamily="{StaticResource MaterialDesignFont}"
         
         d:DataContext="{Binding Source={StaticResource Locator}, Path=SettingsViewModel}"
         DataContext="{Binding Source={StaticResource Locator}, Path=SettingsViewModel}"
-        Title="{Binding Title}" WindowStartupLocation="CenterScreen" MinWidth="1220" MinHeight="700" d:DesignWidth="1461.241" d:DesignHeight="739.969" Closed="Window_Closed">
+        Title="{Binding Title}" WindowStartupLocation="CenterScreen" d:DesignWidth="1461.241" d:DesignHeight="739.969" Closed="Window_Closed" WindowStyle="None" MouseDown="Window_MouseDown">
     <DockPanel>
 
-        <DockPanel Background="{DynamicResource MaterialDesignCardBackground}" Width="256" LastChildFill="True" DockPanel.Dock="Left" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+        <DockPanel Width="256" LastChildFill="True" DockPanel.Dock="Left" materialDesign:ShadowAssist.ShadowDepth="Depth2">
+            <DockPanel.Background>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#B2A2EFE8" Offset="0"/>
+                    <GradientStop Color="#B2263737" Offset="0.853"/>
+                </LinearGradientBrush>
+            </DockPanel.Background>
 
             <materialDesign:ColorZone materialDesign:ShadowAssist.ShadowDepth="Depth1"
                                             Mode="Accent" DockPanel.Dock="Top">
@@ -31,7 +46,7 @@
             </materialDesign:ColorZone>
             <ListBox x:Name="DemoItemsListBox" Margin="0 16 0 16"  
                              ItemsSource="{Binding SelectableViewParts}"
-                             SelectedItem="{Binding SelectedViewPart}">
+                             SelectedItem="{Binding SelectedViewPart}" Opacity="1.2">
                 <ListBox.ItemTemplate>
                     <DataTemplate DataType="domain:DemoItem">
                         <TextBlock Text="{Binding ViewPartName}" Margin="32 0 32 0" />
@@ -39,7 +54,22 @@
                 </ListBox.ItemTemplate>
             </ListBox>
         </DockPanel>
-        <materialDesign:ColorZone Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2"
+
+        <DockPanel DockPanel.Dock="Top" Height="34" MouseDown="DockPanel_MouseDown">
+            <Button x:Name="CloseButton" Width="26" Height="26" DockPanel.Dock="Right" Margin="5" Click="CloseButton_Click" Cursor="Arrow" Background="Red" BorderBrush="Red">
+
+            </Button>
+            <Button Width="26" Height="26" DockPanel.Dock="Right" Margin="5" Background="Green" BorderBrush="Green">
+
+            </Button>
+            <Button x:Name="MinimalizeButton" Width="26" Height="26" DockPanel.Dock="Right" Margin="5" Click="MinimalizeButton_Click" Background="Yellow" BorderBrush="Yellow">
+
+            </Button>
+            <Label></Label>
+
+        </DockPanel>
+
+        <materialDesign:ColorZone  Padding="16" materialDesign:ShadowAssist.ShadowDepth="Depth2"
                                             Mode="PrimaryDark" DockPanel.Dock="Top">
             <DockPanel>
                 <materialDesign:PopupBox DockPanel.Dock="Right" PlacementMode="BottomAndAlignRightEdges" StaysOpen="False">
