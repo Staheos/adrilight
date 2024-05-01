@@ -25,9 +25,9 @@ namespace adrilight
         double audio_cycle = 0;
         double audio = 0;
         
-        public void SetAudioDevice(string name)
+        public void SetAudioDevice(string name, bool useOutputDevice)
         {
-            this.sound.SetAudioDevice(name);
+            this.sound.SetAudioDevice(name, useOutputDevice);
         }
         //double[] hannWindow;
 
@@ -47,7 +47,7 @@ namespace adrilight
             SpotSet = spotSet ?? throw new ArgumentNullException(nameof(spotSet));
 
             this.sound = new Sound();
-            this.sound.SetAudioDevice(userSettings.AudioDevice);
+            this.sound.SetAudioDevice(userSettings.AudioDevice, userSettings.AudioUseOutputDevice);
 
             UserSettings.PropertyChanged += UserSettings_PropertyChanged;
             RefreshTransferState();
@@ -266,7 +266,7 @@ namespace adrilight
                         byte blue;
                         byte green;
                         byte red;
-                        if (UserSettings.AudioEnabled)
+                        if (UserSettings.AudioEnabled && sound.IsCapturing)
                         {
                             blue = (byte)Math.Min(spot.Blue * audio, 255);
                             green = (byte)Math.Min(spot.Green * audio, 255);

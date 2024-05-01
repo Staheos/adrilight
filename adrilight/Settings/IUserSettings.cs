@@ -47,6 +47,8 @@ namespace adrilight
         // in percentages %
         float AudioPower { get; set; }
         string AudioDevice { get; set; }
+        // false captures input devices, true captures output devices via loopback
+        bool AudioUseOutputDevice { get; set; }
         AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get; set; }
     }
 }

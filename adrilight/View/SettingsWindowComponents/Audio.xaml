@@ -87,6 +87,16 @@
         </materialDesign:Card>
         <materialDesign:Card Margin="4 4 4 4" Width="300" Grid.Row="2" Grid.Column="1">
             <StackPanel Margin="8 8 8 8" >
+                <TextBlock FontWeight="Bold">Audio Source</TextBlock>
+                <DockPanel Margin="0 8 0 16" HorizontalAlignment="Center">
+                    <TextBlock VerticalAlignment="Center">Input</TextBlock>
+                    <ToggleButton Margin="8 0 8 0"
+                          IsChecked="{Binding Settings.AudioUseOutputDevice}"
+                          VerticalAlignment="Center"
+                          Style="{StaticResource MaterialDesignSwitchToggleButton}"
+                          ToolTip="Capture from input (microphone) or output (speakers) devices" />
+                    <TextBlock VerticalAlignment="Center">Output</TextBlock>
+                </DockPanel>
                 <TextBlock FontWeight="Bold">Audio Device</TextBlock>
                 <ComboBox
                 materialDesign:HintAssist.Hint="Audio Device"
@@ -100,7 +110,7 @@
                     </ComboBox.SelectedValue>
                 </ComboBox>
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0 22 0 0" TextAlignment="Justify">
-                Playback device to capture audio from.
+                Device to capture audio from. Input lists recording devices like microphones, Output lists playback devices and records what you hear.
                 </TextBlock>
             </StackPanel>
         </materialDesign:Card>

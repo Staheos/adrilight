@@ -4,6 +4,7 @@ using adrilight.Settings;
 using adrilight.View;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
+using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using NLog;
 using System;
@@ -108,7 +109,20 @@ namespace adrilight.ViewModel
                         break;
 
                     case nameof(Settings.AudioDevice):
-                        this.serialStream.SetAudioDevice(Settings.AudioDevice);
+                        this.serialStream.SetAudioDevice(Settings.AudioDevice, Settings.AudioUseOutputDevice);
+                        break;
+
+                    case nameof(Settings.AudioUseOutputDevice):
+                        RaisePropertyChanged(() => AudioDevices);
+                        var defaultDevice = GetDefaultAudioDeviceName();
+                        if (Settings.AudioDevice != defaultDevice)
+                        {
+                            Settings.AudioDevice = defaultDevice;
+                        }
+                        else
+                        {
+                            this.serialStream.SetAudioDevice(Settings.AudioDevice, Settings.AudioUseOutputDevice);
+                        }
                         break;
                 }
             };
@@ -146,19 +160,51 @@ namespace adrilight.ViewModel
                 IsPreviewTabOpen = _selectedViewPart is View.SettingsWindowComponents.Preview.PreviewSelectableViewPart;
             }
         }
-        public IList<string> AudioDevices 
+        public IList<string> AudioDevices
         {
             // refrech on select page
             get
             {
                 List<string> devices = new List<string>();
-                int device_count = WaveInEvent.DeviceCount;
-                for (int i = 0; i < device_count; i++)
+                if (Settings.AudioUseOutputDevice)
                 {
-                    devices.Add(WaveInEvent.GetCapabilities(i).ProductName);
+                    var enumerator = new MMDeviceEnumerator();
+                    foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+                    {
+                        devices.Add(device.FriendlyName);
+                    }
+                }
+                else
+                {
+                    int device_count = WaveInEvent.DeviceCount;
+                    for (int i = 0; i < device_count; i++)
+                    {
+                        devices.Add(WaveInEvent.GetCapabilities(i).ProductName);
+                    }
                 }
                 return devices;
             }
+        }
+
+        private string GetDefaultAudioDeviceName()
+        {
+            if (Settings.AudioUseOutputDevice)
+            {
+                try
+                {
+                    var enumerator = new MMDeviceEnumerator();
+                    return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia).FriendlyName;
+                }
+                catch (Exception)
+                {
+                    return "NOT SET";
+                }
+            }
+            if (WaveInEvent.DeviceCount > 0)
+            {
+                return WaveInEvent.GetCapabilities(0).ProductName;
+            }
+            return "NOT SET";
         }
 
         private bool _isPreviewTabOpen;

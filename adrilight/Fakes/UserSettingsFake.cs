@@ -50,6 +50,7 @@ namespace adrilight.Fakes
         public bool AudioEnabled { get; set; }
         public float AudioPower { get; set; }
         public string AudioDevice {  get; set; }
+        public bool AudioUseOutputDevice { get; set; }
 
         public AlternateWhiteBalanceModeEnum AlternateWhiteBalanceMode { get; set; } = AlternateWhiteBalanceModeEnum.Off;
 #pragma warning disable CS0067

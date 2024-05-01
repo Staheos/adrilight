@@ -46,6 +46,7 @@ namespace adrilight
         private bool _audioEnabled = false;
         private float _audioPower = 1f;
         private string _audioDevice = "NOT SET";
+        private bool _audioUseOutputDevice = false;
 
         private AlternateWhiteBalanceModeEnum _alternateWhiteBalanceMode = AlternateWhiteBalanceModeEnum.Off;
 
@@ -90,6 +91,7 @@ namespace adrilight
         public bool AudioEnabled { get => this._audioEnabled; set { Set(() => AudioEnabled, ref this._audioEnabled, value); } }
         public float AudioPower { get => this._audioPower; set { Set(() => AudioPower, ref this._audioPower, value); } }
         public string AudioDevice { get => this._audioDevice; set { Set(() => AudioDevice, ref this._audioDevice, value); } }
+        public bool AudioUseOutputDevice { get => this._audioUseOutputDevice; set { Set(() => AudioUseOutputDevice, ref this._audioUseOutputDevice, value); } }
         //public string AudioDevice { get => WaveIn.GetCapabilities(this._audioDevice).ProductName; set 
         //    {
         //        //WaveInCapabilities? cap = null;
