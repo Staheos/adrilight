@@ -250,8 +250,8 @@ namespace adrilight
                     // fix volume
                     audio_cycle /= 450;
 
-                    // AudioPower is percentages
-                    audio = audio_cycle * UserSettings.AudioPower / 100;
+                    // AudioPower is percentages, the slider goes to 100 so double it here to keep the old 1 to 200 range
+                    audio = audio_cycle * UserSettings.AudioPower * 2 / 100;
                 }
                 else
                 {

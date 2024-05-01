@@ -356,7 +356,7 @@ namespace adrilight.ViewModel
             }
         }
 
-        private float _audioPowerMaximum = 200;
+        private float _audioPowerMaximum = 100;
         public float AudioPowerMaximum {
             get
             {
