@@ -21,21 +21,28 @@ The settings window UI was also cleaned up.
 
 C# / .NET Framework 4.7.2, WPF (MVVM). Screen capture through the Windows Desktop Duplication API (SharpDX). Audio through NAudio and NAudio.Wasapi. Arduino firmware in C++ with FastLED.
 
+## My setup
+
+For reference, this is the build I run it on:
+
+* Monitor: Philips 276E8VJSB, 27 inch 4K IPS
+* 104 addressable WS2812b LEDs (5V) around the back of the monitor
+* Arduino Nano, connected to the PC over USB, talking to the app over a COM port
+* The Arduino draws its own power from USB. The LED strip is powered separately from the PC power supply over a SATA connector, through a small protection board that guards against shorts. Data comes from the Arduino, power from the PSU, with a shared ground.
+
+Powering the strip separately matters: 104 LEDs at full white draw far more current than a USB port or an Arduino can safely supply, so the strip needs its own 5V source.
+
 ## Setup
 
-For the full hardware build (LED strip, Arduino wiring, power supply) and the original setup guide, see the [upstream project](https://github.com/fabsenet/adrilight). The wiring and Arduino side are unchanged in this fork.
+For the full hardware build (wiring, soldering, Arduino flashing) see the [upstream project](https://github.com/fabsenet/adrilight). The wiring and Arduino side are unchanged in this fork.
 
 Software, in short:
 
-1. Get an Arduino and a WS2812b strip, wire the strip around the back of the screen, and connect it to the Arduino.
+1. Wire a WS2812b strip around the back of the screen and connect it to the Arduino, with the strip powered from its own 5V source.
 2. Flash `adrilight.ino` (needs the FastLED library) to the Arduino.
 3. Build this repo or run it, set the number of LEDs on each side, pick the COM port, and adjust the offset until the LEDs line up with the screen.
-4. To use the audio mode, open the Audio tab, turn it on, and pick Input or Output plus a device.
+4. For the audio mode, open the Audio tab, turn it on, and pick Input or Output plus a device.
 
 ## Data flow
 
 PC (adrilight.exe) sends colors over USB to the Arduino (adrilight.ino), which drives the LEDs.
-
-## License
-
-Inherits the upstream project's license. See [fabsenet/adrilight](https://github.com/fabsenet/adrilight).
