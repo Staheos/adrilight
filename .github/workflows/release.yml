@@ -1,0 +1,37 @@
+name: Release build
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup NuGet
+        uses: nuget/setup-nuget@v2
+
+      - name: Restore packages
+        run: nuget restore adrilight.sln
+
+      - name: Build
+        run: msbuild adrilight\adrilight.csproj /p:Configuration=Release /v:m /nologo
+
+      - name: Package
+        run: Compress-Archive -Path adrilight\bin\Release\* -DestinationPath adrilight-${{ github.ref_name }}.zip
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: adrilight-${{ github.ref_name }}.zip
