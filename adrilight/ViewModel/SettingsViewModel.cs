@@ -1,11 +1,11 @@
-﻿using adrilight.DesktopDuplication;
+﻿using adrilight.Audio;
+using adrilight.DesktopDuplication;
 using adrilight.Resources;
 using adrilight.Settings;
 using adrilight.View;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using NAudio.CoreAudioApi;
-using NAudio.Wave;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -114,7 +114,7 @@ namespace adrilight.ViewModel
 
                     case nameof(Settings.AudioUseOutputDevice):
                         RaisePropertyChanged(() => AudioDevices);
-                        var defaultDevice = GetDefaultAudioDeviceName();
+                        var defaultDevice = GetDefaultAudioDeviceId();
                         if (Settings.AudioDevice != defaultDevice)
                         {
                             Settings.AudioDevice = defaultDevice;
@@ -160,51 +160,34 @@ namespace adrilight.ViewModel
                 IsPreviewTabOpen = _selectedViewPart is View.SettingsWindowComponents.Preview.PreviewSelectableViewPart;
             }
         }
-        public IList<string> AudioDevices
+        public IList<AudioDeviceInfo> AudioDevices
         {
             // refrech on select page
             get
             {
-                List<string> devices = new List<string>();
-                if (Settings.AudioUseOutputDevice)
+                List<AudioDeviceInfo> devices = new List<AudioDeviceInfo>();
+                var flow = Settings.AudioUseOutputDevice ? DataFlow.Render : DataFlow.Capture;
+                var enumerator = new MMDeviceEnumerator();
+                foreach (var device in enumerator.EnumerateAudioEndPoints(flow, DeviceState.Active))
                 {
-                    var enumerator = new MMDeviceEnumerator();
-                    foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
-                    {
-                        devices.Add(device.FriendlyName);
-                    }
-                }
-                else
-                {
-                    int device_count = WaveInEvent.DeviceCount;
-                    for (int i = 0; i < device_count; i++)
-                    {
-                        devices.Add(WaveInEvent.GetCapabilities(i).ProductName);
-                    }
+                    devices.Add(new AudioDeviceInfo { Id = device.ID, Name = device.FriendlyName });
                 }
                 return devices;
             }
         }
 
-        private string GetDefaultAudioDeviceName()
+        private string GetDefaultAudioDeviceId()
         {
-            if (Settings.AudioUseOutputDevice)
+            var flow = Settings.AudioUseOutputDevice ? DataFlow.Render : DataFlow.Capture;
+            try
             {
-                try
-                {
-                    var enumerator = new MMDeviceEnumerator();
-                    return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia).FriendlyName;
-                }
-                catch (Exception)
-                {
-                    return "NOT SET";
-                }
+                var enumerator = new MMDeviceEnumerator();
+                return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia).ID;
             }
-            if (WaveInEvent.DeviceCount > 0)
+            catch (Exception)
             {
-                return WaveInEvent.GetCapabilities(0).ProductName;
+                return "NOT SET";
             }
-            return "NOT SET";
         }
 
         private bool _isPreviewTabOpen;

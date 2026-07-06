@@ -11,9 +11,9 @@ The audio can come from two sources, switched with an Input/Output toggle in the
 * **Input**: an audio input device, so a microphone or line-in.
 * **Output**: what the computer is actually playing through the speakers, captured with WASAPI loopback.
 
-When you flip the toggle the device list refills with the right set of devices and picks the system default for that direction. If no device is available nothing is selected and the LEDs just show the normal screen colors instead of breaking.
+When you flip the toggle the device list refills with the right set of devices and picks the system default for that direction. If no device is available nothing is selected and the LEDs just show the normal screen colors. The chosen device is remembered by its stable endpoint ID.
 
-Under the hood: audio is captured through NAudio, run through a Hann window and an FFT (Accord.Math), grouped into bands, smoothed across frames, and used to scale the brightness of each spot. Brightness only gets modulated while capture is actually running, so a missing or unplugged device leaves the normal colors untouched instead of blacking out the strip.
+Under the hood: audio is captured through NAudio (WASAPI for both directions), run through a Hann window and an FFT (Accord.Math), grouped into bands, smoothed across frames, and used to scale the brightness of each spot. Brightness only gets modulated while capture is actually running, so a missing or unplugged device leaves the normal colors untouched.
 
 The settings window UI was also cleaned up.
 

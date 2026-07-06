@@ -21,7 +21,7 @@ namespace adrilight.Fakes
         }
 
         public bool IsValid() => true;
-        public void SetAudioDevice(string name, bool useOutputDevice)
+        public void SetAudioDevice(string deviceId, bool useOutputDevice)
         {
 
         }

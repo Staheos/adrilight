@@ -334,6 +334,7 @@
     <Compile Include="Fakes\UserSettingsFake.cs" />
     <Compile Include="DesktopDuplication\IDesktopDuplicatorReader.cs" />
     <Compile Include="Settings\AlternateWhiteBalanceModeEnum.cs" />
+    <Compile Include="Audio\AudioDeviceInfo.cs" />
     <Compile Include="Audio\AudioRecv.cs" />
     <Compile Include="Audio\Sound.cs" />
     <Compile Include="Util\ColorUtil.cs" />

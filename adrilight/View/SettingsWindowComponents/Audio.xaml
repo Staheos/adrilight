@@ -100,7 +100,9 @@
                 <TextBlock FontWeight="Bold">Audio Device</TextBlock>
                 <ComboBox
                 materialDesign:HintAssist.Hint="Audio Device"
-                ItemsSource="{Binding AudioDevices}">
+                ItemsSource="{Binding AudioDevices}"
+                DisplayMemberPath="Name"
+                SelectedValuePath="Id">
                     <ComboBox.SelectedValue>
                         <Binding Path="Settings.AudioDevice" UpdateSourceTrigger="PropertyChanged">
                             <Binding.ValidationRules>

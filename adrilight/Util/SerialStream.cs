@@ -25,9 +25,9 @@ namespace adrilight
         double audio_cycle = 0;
         double audio = 0;
         
-        public void SetAudioDevice(string name, bool useOutputDevice)
+        public void SetAudioDevice(string deviceId, bool useOutputDevice)
         {
-            this.sound.SetAudioDevice(name, useOutputDevice);
+            this.sound.SetAudioDevice(deviceId, useOutputDevice);
         }
         //double[] hannWindow;
 

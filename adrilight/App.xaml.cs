@@ -90,6 +90,13 @@ namespace adrilight
                     UserSettings.SpotsX = Math.Max(1, UserSettings.SpotsX);
                     UserSettings.SpotsY = Math.Max(1, UserSettings.SpotsY-2);
                 }
+                if(UserSettings.ConfigFileVersion == 2)
+                {
+                    UserSettings.ConfigFileVersion = 3;
+
+                    //audio devices used to be stored by display name, now they are stored by their stable endpoint id
+                    UserSettings.AudioDevice = Sound.FindDeviceIdByName(UserSettings.AudioDevice, UserSettings.AudioUseOutputDevice);
+                }
             }
 
             SetupNotifyIcon();

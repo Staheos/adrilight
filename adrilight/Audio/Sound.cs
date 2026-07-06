@@ -23,12 +23,10 @@ namespace adrilight.Audio
     {
         private ILogger _log = LogManager.GetCurrentClassLogger();
 
-        private int RATE = 44100;   // sample rate of the sound card
         public int BUFFERSIZE = 1024;  // Must be power of 2
 
-        private int deviceNum = 0;
+        private string deviceId = "NOT SET";
         private bool useOutputDevice = false;
-        private MMDevice outputDevice;
         private IWaveIn waveInEvent;
         public BufferedWaveProvider bwp;
 
@@ -116,37 +114,22 @@ namespace adrilight.Audio
 
             try
             {
+                var device = ResolveDevice();
+                if (device == null)
+                {
+                    _log.Info("No audio device available, capture not started.");
+                    return;
+                }
                 if (this.useOutputDevice)
                 {
-                    var device = this.outputDevice;
-                    if (device == null)
-                    {
-                        device = GetDefaultOutputDevice();
-                    }
-                    if (device == null)
-                    {
-                        _log.Info("No output audio device available, capture not started.");
-                        return;
-                    }
-                    var loopback = new WasapiLoopbackCapture(device);
-                    this.waveInEvent = loopback;
-                    // loopback gives 32 bit float samples in the device mix format, they get converted to 16 bit mono in the callback
-                    this.bwp = new BufferedWaveProvider(new NAudio.Wave.WaveFormat(rate: loopback.WaveFormat.SampleRate, bits: 16, channels: 1));
+                    this.waveInEvent = new WasapiLoopbackCapture(device);
                 }
                 else
                 {
-                    if (WaveIn.DeviceCount == 0)
-                    {
-                        _log.Info("No input audio device available, capture not started.");
-                        return;
-                    }
-                    this.waveInEvent = new NAudio.Wave.WaveInEvent {
-                        DeviceNumber = this.deviceNum, // indicates which microphone to use
-                        WaveFormat = new NAudio.Wave.WaveFormat(rate: 44100, bits: 16, channels: 1),
-                        BufferMilliseconds = 20
-                    };
-                    this.bwp = new BufferedWaveProvider(this.waveInEvent.WaveFormat);
+                    this.waveInEvent = new WasapiCapture(device, true, 20);
                 }
+                // wasapi gives 32 bit float samples in the device mix format, they get converted to 16 bit mono in the callback
+                this.bwp = new BufferedWaveProvider(new NAudio.Wave.WaveFormat(rate: this.waveInEvent.WaveFormat.SampleRate, bits: 16, channels: 1));
                 this.bwp.BufferLength = BUFFERSIZE;
                 this.bwp.DiscardOnBufferOverflow = true;
 
@@ -183,38 +166,31 @@ namespace adrilight.Audio
             {
                 return;
             }
-            if (this.useOutputDevice)
+            // downmix float samples to 16 bit mono so GetData can stay the same
+            int channels = capture.WaveFormat.Channels;
+            int frames = e.BytesRecorded / 4 / channels;
+            byte[] converted = new byte[frames * 2];
+            for (int i = 0; i < frames; i++)
             {
-                // downmix float samples to 16 bit mono so GetData can stay the same
-                int channels = capture.WaveFormat.Channels;
-                int frames = e.BytesRecorded / 4 / channels;
-                byte[] converted = new byte[frames * 2];
-                for (int i = 0; i < frames; i++)
+                float sample = 0;
+                for (int c = 0; c < channels; c++)
                 {
-                    float sample = 0;
-                    for (int c = 0; c < channels; c++)
-                    {
-                        sample += BitConverter.ToSingle(e.Buffer, (i * channels + c) * 4);
-                    }
-                    sample /= channels;
-                    if (sample > 1f)
-                    {
-                        sample = 1f;
-                    }
-                    if (sample < -1f)
-                    {
-                        sample = -1f;
-                    }
-                    Int16 pcm = (Int16)(sample * Int16.MaxValue);
-                    converted[i * 2] = (byte)(pcm & 0xFF);
-                    converted[i * 2 + 1] = (byte)((pcm >> 8) & 0xFF);
+                    sample += BitConverter.ToSingle(e.Buffer, (i * channels + c) * 4);
                 }
-                bwp.AddSamples(converted, 0, converted.Length);
+                sample /= channels;
+                if (sample > 1f)
+                {
+                    sample = 1f;
+                }
+                if (sample < -1f)
+                {
+                    sample = -1f;
+                }
+                Int16 pcm = (Int16)(sample * Int16.MaxValue);
+                converted[i * 2] = (byte)(pcm & 0xFF);
+                converted[i * 2 + 1] = (byte)((pcm >> 8) & 0xFF);
             }
-            else
-            {
-                bwp.AddSamples(e.Buffer, 0, e.BytesRecorded);
-            }
+            bwp.AddSamples(converted, 0, converted.Length);
         }
         public void WaveIn_RecordingStopped(object? sender, StoppedEventArgs e)
         {
@@ -233,60 +209,72 @@ namespace adrilight.Audio
             }
             if (this.recording)
             {
-                // the selected device is gone, retry once on the current default
-                this.outputDevice = null;
+                // the selected device is gone, ResolveDevice falls back to the current default
                 this.StartCapture();
             }
         }
 
-        public void SetAudioDevice(string name, bool useOutputDevice)
+        public void SetAudioDevice(string deviceId, bool useOutputDevice)
         {
+            this.deviceId = deviceId;
             this.useOutputDevice = useOutputDevice;
-            this.outputDevice = null;
-            if (useOutputDevice)
-            {
-                var enumerator = new MMDeviceEnumerator();
-                foreach (var device in enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
-                {
-                    if (device.FriendlyName == name)
-                    {
-                        this.outputDevice = device;
-                    }
-                }
-                if (this.outputDevice == null)
-                {
-                    this.outputDevice = GetDefaultOutputDevice();
-                }
-            }
-            else
-            {
-                int device_count = WaveIn.DeviceCount;
-                for (int i = 0; i < device_count; i++)
-                {
-                    var device = WaveIn.GetCapabilities(i);
-                    if (device.ProductName == name)
-                    {
-                        this.deviceNum = i;
-                    }
-                }
-            }
             if (this.recording)
             {
                 this.StopCapture();
                 this.StartCapture();
             }
         }
-        private MMDevice GetDefaultOutputDevice()
+        private MMDevice ResolveDevice()
         {
+            var flow = this.useOutputDevice ? DataFlow.Render : DataFlow.Capture;
+            var enumerator = new MMDeviceEnumerator();
+            if (!string.IsNullOrEmpty(this.deviceId) && this.deviceId != "NOT SET")
+            {
+                try
+                {
+                    var device = enumerator.GetDevice(this.deviceId);
+                    if (device.State == DeviceState.Active && device.DataFlow == flow)
+                    {
+                        return device;
+                    }
+                }
+                catch (Exception)
+                {
+                    // stored device is unknown or unplugged, fall through to the default endpoint
+                }
+            }
             try
             {
-                var enumerator = new MMDeviceEnumerator();
-                return enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+                return enumerator.GetDefaultAudioEndpoint(flow, Role.Multimedia);
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+        public static string FindDeviceIdByName(string name, bool useOutputDevice)
+        {
+            if (string.IsNullOrEmpty(name) || name == "NOT SET")
+            {
+                return "NOT SET";
+            }
+            try
+            {
+                var flow = useOutputDevice ? DataFlow.Render : DataFlow.Capture;
+                var enumerator = new MMDeviceEnumerator();
+                foreach (var device in enumerator.EnumerateAudioEndPoints(flow, DeviceState.Active))
+                {
+                    // input names used to come from WaveIn which truncates them to 31 characters, so a prefix match is needed too
+                    if (device.FriendlyName == name || device.FriendlyName.StartsWith(name))
+                    {
+                        return device.ID;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+            }
+            return "NOT SET";
         }
     }
 }

@@ -7,6 +7,6 @@
         void Start();
         void Stop();
         bool IsValid();
-        void SetAudioDevice(string name, bool useOutputDevice);
+        void SetAudioDevice(string deviceId, bool useOutputDevice);
     }
 }

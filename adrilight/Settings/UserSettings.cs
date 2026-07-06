@@ -42,7 +42,7 @@ namespace adrilight
 
         private bool _sendRandomColors = false;
         private int _limitFps = 60;
-        private int _configFileVersion = 2;
+        private int _configFileVersion = 3;
         private bool _audioEnabled = false;
         private float _audioPower = 1f;
         private string _audioDevice = "NOT SET";
