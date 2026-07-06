@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -57,6 +58,18 @@ namespace adrilight.View.SettingsWindowComponents
             {
                 e.Cancel = true;
                 Process.Start(e.Uri.AbsoluteUri);
+            }
+        }
+
+        private void Browser_Navigated(object sender, NavigationEventArgs e)
+        {
+            //the embedded browser runs on the old IE engine which chokes on modern scripts, so do not pop script error dialogs
+            var activeX = this.browser.GetType().InvokeMember("ActiveXInstance",
+                BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.NonPublic,
+                null, this.browser, new object[] { });
+            if (activeX != null)
+            {
+                activeX.GetType().InvokeMember("Silent", BindingFlags.SetProperty, null, activeX, new object[] { true });
             }
         }
     }
